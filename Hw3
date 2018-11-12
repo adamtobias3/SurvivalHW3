@@ -1,0 +1,21 @@
+library(survival)
+library(survminer)
+library(flexsurv)
+library(tidyverse)
+
+fit <- survreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ backup + bridgecrane + servo + trashrack + elevation + slope + age, 
+              data = katrina, dist = "weibull")
+
+summary(fit)
+exp(coef(fit))
+# create an ID variable
+katrina$ID <- 1:nrow(katrina)
+
+# fit proportional hazards model using coxph()
+# same structure as everything else
+fit_cox <- coxph(Surv(time = hour, event = reason %in% c(2, 3)) ~ backup + bridgecrane + servo + trashrack + elevation + slope + age, 
+               data = katrina)
+summary(fit_cox)
+## Plot Cox curve
+ggsurvplot(survfit(fit_cox), data = katrina, legend = "none", break.y.by = 0.1,
+           xlab = "hour", ylab = "survival probability")
